@@ -79,6 +79,7 @@ footer{text-align:center;padding:0 0 28px;font-size:13px}footer a{color:var(--mu
 .cbx svg{width:20px;height:20px;transition:transform .2s}.cb input[aria-expanded=true]+.cbx svg{transform:rotate(180deg)}
 .gl{position:absolute;z-index:30;top:calc(100% + 6px);inset-inline:0;max-height:250px;overflow-y:auto;margin:0;padding:6px;list-style:none;background:#fff;border:1px solid var(--gold);border-radius:12px;box-shadow:0 14px 28px -14px rgba(0,0,0,.3)}
 .gl li{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:15.5px}.gl li:hover,.gl li.on{background:#FFF6E0}.gl li.sel{color:var(--red2);font-weight:700}.gl li.none{color:var(--mute);cursor:default}
+.gl{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;max-height:min(250px,45vh)}
 </style>
 </head>
 <body>
@@ -148,8 +149,8 @@ footer{text-align:center;padding:0 0 28px;font-size:13px}footer a{color:var(--mu
 <script>
 /* ===== الإعدادات المركزية ===== */
 const LOGO_URL = "logo.png";                       // ضع رابط اللوجو هنا (مكان واحد لكل الصفحات)
-const SUPABASE_URL = "https://kggwsmskuxykkbytpxik.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_S7HCePjZI6ofr6zQY5TY1g_4uXzMr45";
+const SUPABASE_URL = "https://kggwsmskuxykkbytpxik.supabase.co";  // ضع رابط Supabase هنا (مكان واحد لكل الصفحات)
+const SUPABASE_ANON_KEY = "sb_publishable_S7HCePjZI6ofr6zQY5TY1g_4uXzMr45";  // ضع مفتاح Supabase هنا (مكان واحد لكل الصفحات)
 /* ============================== */
 const $ = id => document.getElementById(id);
 const GOV = {'01':'القاهرة','02':'الإسكندرية','03':'بورسعيد','04':'السويس','11':'دمياط','12':'الدقهلية','13':'الشرقية','14':'القليوبية','15':'كفر الشيخ','16':'الغربية','17':'المنوفية','18':'البحيرة','19':'الإسماعيلية','21':'الجيزة','22':'بني سويف','23':'الفيوم','24':'المنيا','25':'أسيوط','26':'سوهاج','27':'قنا','28':'أسوان','29':'الأقصر','31':'البحر الأحمر','32':'الوادي الجديد','33':'مطروح','34':'شمال سيناء','35':'جنوب سيناء','88':'خارج الجمهورية'};
@@ -205,12 +206,16 @@ rules.residence=v=>GOVS_ALL.includes(v)?'':'اختر محافظة من القا�
   inp.addEventListener('click',()=>{if(!isOpen())open('')});
   inp.addEventListener('input',()=>open(inp.value));
   btn.addEventListener('pointerdown',e=>{e.preventDefault();if(isOpen())close();else{inp.focus();open('')}});
-  ul.addEventListener('pointerdown',e=>{const li=e.target.closest('li[data-v]');e.preventDefault();if(li)pick(li.dataset.v)});
+  let touching=false,sx=0,sy=0,moved=false,tli=null;   // الاختيار عند رفع الإصبع فقط، حتى لا يمنع التمرير
+  ul.addEventListener('pointerdown',e=>{touching=true;moved=false;sx=e.clientX;sy=e.clientY;tli=e.target.closest('li[data-v]');if(e.pointerType==='mouse')e.preventDefault()});
+  ul.addEventListener('pointermove',e=>{if(Math.abs(e.clientX-sx)>8||Math.abs(e.clientY-sy)>8)moved=true});
+  ul.addEventListener('pointerup',e=>{if(!moved&&tli&&tli===e.target.closest('li[data-v]'))pick(tli.dataset.v);setTimeout(()=>{touching=false},300)});
+  ul.addEventListener('pointercancel',()=>{moved=true;setTimeout(()=>{touching=false},400)});
   inp.addEventListener('keydown',e=>{const lis=[...ul.querySelectorAll('li[data-v]')];
     if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!isOpen())open('');if(!lis.length)return;idx=(idx+(e.key==='ArrowDown'?1:-1)+lis.length)%lis.length;lis.forEach((l,i)=>l.classList.toggle('on',i===idx));lis[idx].scrollIntoView({block:'nearest'})}
     else if(e.key==='Enter'&&isOpen()){e.preventDefault();if(idx>=0)pick(lis[idx].dataset.v);else if(lis.length===1)pick(lis[0].dataset.v)}
     else if(e.key==='Escape')close()});
-  inp.addEventListener('blur',()=>setTimeout(()=>{const m=GOVS_ALL.filter(g=>g.includes(inp.value.trim()));if(inp.value.trim()&&!GOVS_ALL.includes(inp.value.trim())&&m.length===1)inp.value=m[0];close()},120));
+  inp.addEventListener('blur',()=>setTimeout(()=>{if(touching)return;const m=GOVS_ALL.filter(g=>g.includes(inp.value.trim()));if(inp.value.trim()&&!GOVS_ALL.includes(inp.value.trim())&&m.length===1)inp.value=m[0];close()},120));
 })();
 
 function validate(){
