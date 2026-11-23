@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة التحكم | اتحاد طلاب تحيا مصر</title>
+<link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--red:#B5121B;--red2:#8F1018;--gold:#C9A44C;--gold2:#E7D49B;--soft:#FAFAFA;--gray:#F3F3F3;--ink:#252525;--mute:#777;--line:#EAE3D0}
+*{box-sizing:border-box}body{margin:0;font-family:'IBM Plex Sans Arabic',Cairo,sans-serif;color:var(--ink);background:#fff;line-height:1.7}
+h1,h2,h3,button,label,th{font-family:Cairo,sans-serif}.hide{display:none!important}
+input,select,textarea{width:100%;min-height:44px;border:1.5px solid #E4E4E4;border-radius:10px;padding:8px 12px;font:inherit;background:var(--soft)}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,164,76,.18);background:#fff}
+.btn{min-height:44px;border:0;border-radius:10px;padding:0 18px;background:linear-gradient(180deg,#C0161F,var(--red2));color:#fff;font-weight:700;cursor:pointer;box-shadow:inset 0 -3px 0 var(--gold)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:none;border:1.5px solid var(--line)}.btn:disabled{opacity:.5}
+.err{color:var(--red);font-size:14px;margin-top:8px}
+#login{min-height:100vh;display:grid;place-items:center;padding:20px;border-top:4px solid var(--gold)}
+.card{border:1px solid var(--line);border-radius:16px;padding:22px;background:#fff}
+#login .card{width:100%;max-width:380px}.f{margin-bottom:14px}.f label{display:block;font-weight:600;margin-bottom:5px;font-size:14px}
+#app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+aside{border-inline-end:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;background:linear-gradient(180deg,#fff,#FFFDF7)}
+aside h2{font-size:18px;margin:0 8px 18px}aside nav button{display:block;width:100%;text-align:right;border:0;background:none;padding:11px 14px;border-radius:10px;font-size:15px;cursor:pointer;margin-bottom:4px;color:var(--ink)}
+aside nav a{display:block;padding:11px 14px;border-radius:10px;font-size:15px;color:var(--ink);text-decoration:none;margin-bottom:4px}aside nav a:hover{background:var(--gray)}aside nav button.on{background:#FFF6E0;color:var(--red2);font-weight:700;box-shadow:inset -3px 0 var(--gold)}
+aside{display:flex;flex-direction:column}aside nav{flex:1}
+.uc{display:flex;align-items:center;gap:11px;margin-top:16px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;min-width:0}
+.av{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--gold);background:#FFFBF0;color:var(--red2)}
+.av svg{width:20px;height:20px}.ut{min-width:0;line-height:1.35}.ut b{display:block;font-family:Cairo;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ut small{display:inline-block;margin-top:3px;padding:0 9px;border-radius:99px;font-size:11.5px;color:#fff;background:var(--red)}.ut small.s{background:var(--gold)}.ut small.v{background:#8a8a8a}
+main{padding:26px 28px 60px;min-width:0}main h1{margin:0 0 18px;font-size:24px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stat{border:1px solid var(--line);border-radius:14px;padding:14px 16px;position:relative}.stat:before{content:"";position:absolute;top:-1px;right:16px;width:34px;height:3px;background:var(--gold)}
+.stat b{display:block;font-family:Cairo;font-size:28px;color:var(--red);line-height:1.2}.stat span{font-size:13px;color:var(--mute)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.bar{display:grid;grid-template-columns:110px 1fr 36px;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+.bar i{display:block;height:10px;border-radius:9px;background:linear-gradient(90deg,var(--red),var(--gold))}
+.days{display:flex;gap:5px;align-items:flex-end;height:130px}.days div{flex:1;text-align:center;font-size:10px;color:var(--mute)}
+.days i{display:block;background:linear-gradient(180deg,var(--gold),var(--red));border-radius:5px 5px 0 0;min-height:2px;margin-bottom:3px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px}table{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
+th{background:#FFFBF0;text-align:right;padding:11px 12px;border-bottom:1px solid var(--line)}td{padding:9px 12px;border-bottom:1px solid #f1ece0}
+tr:hover td{background:#FFFDF8}.pill{padding:3px 11px;border-radius:99px;font-size:12.5px;color:#fff;font-weight:600}
+td select{min-height:34px;padding:2px 8px;width:auto}
+.pager{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+dialog{border:1px solid var(--gold);border-radius:16px;padding:22px;max-width:520px;width:92%}dialog::backdrop{background:rgba(255,255,255,.75)}
+dl{display:grid;grid-template-columns:130px 1fr;gap:6px 10px;margin:0}dt{color:var(--mute)}dd{margin:0;word-break:break-word}
+.set{max-width:640px}.set textarea{min-height:80px}.chk{display:flex;gap:10px;align-items:center}.chk input{width:22px;min-height:22px;accent-color:var(--red)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--gold);padding:10px 20px;border-radius:99px;z-index:9}
+@media(max-width:820px){#app{grid-template-columns:1fr}aside{position:static;height:auto;display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-inline-end:0;border-bottom:1px solid var(--line)}aside h2{margin:0 8px 0 0}aside{flex-direction:row}aside nav{display:flex;gap:4px;overflow-x:auto;width:100%;flex:none}aside nav button,aside nav a{white-space:nowrap;width:auto}.uc{display:none}main{padding:18px 14px 50px}}
+</style></head>
+<body>
+<section id="login"><form class="card" id="lf"><img src="logo.png" alt="" style="width:78px;height:78px;display:block;margin:0 auto 8px"><h1 style="margin:0 0 4px;font-size:22px;text-align:center">لوحة التحكم</h1><p style="color:var(--mute);margin:0 0 18px;text-align:center">سجّل الدخول ببريد الإدارة.</p>
+<div class="f"><label>البريد الإلكتروني</label><input id="em" type="email" dir="ltr" required autocomplete="username"></div>
+<div class="f"><label>كلمة المرور</label><input id="pw" type="password" dir="ltr" required autocomplete="current-password"></div>
+<button class="btn" style="width:100%" id="lb">دخول</button><div class="err" id="le"></div><p style="text-align:center;margin:14px 0 0;font-size:14px"><a href="index.html" style="color:var(--red2)">العودة إلى صفحة التسجيل</a></p></form></section>
+
+<div id="app" class="hide">
+<aside><div style="display:flex;align-items:center;gap:10px;margin:0 8px 18px"><img src="logo.png" alt="" style="width:44px;height:44px;object-fit:contain"><h2 style="margin:0;font-size:16px;line-height:1.3">اتحاد طلاب<br>تحيا مصر</h2></div><nav>
+<button data-v="ov" class="on">الرئيسية</button><button data-v="reg">المسجلون</button><button data-v="log">سجل النشاطات</button><button data-v="set">الإعدادات</button><a href="index.html" target="_blank" rel="noopener">صفحة التسجيل</a><button id="out">تسجيل الخروج</button></nav>
+<div class="uc" id="uc"><div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div><div class="ut"><b id="un"></b><small id="ur"></small></div></div></aside>
+<main>
+<section id="v-ov"><h1>الرئيسية</h1><div class="stats" id="stats"></div><div class="charts" id="charts"></div></section>
+<section id="v-reg" class="hide"><h1>المسجلون</h1>
+<div class="filters">
+<input id="q" placeholder="بحث: اسم / رقم قومي / هاتف / بريد">
+<select id="fs"><option value="">كل الحالات</option></select>
+<select id="fg"><option value="">كل الجنسين</option><option>ذكر</option><option>أنثى</option></select>
+<select id="fr"><option value="">كل المحافظات</option></select>
+<select id="fe"><option value="">كل المؤهلات</option><option>ثانوي</option><option>جامعي</option><option>فوق جامعي</option></select>
+<input id="a1" type="number" min="0" placeholder="عمر من"><input id="a2" type="number" min="0" placeholder="عمر إلى">
+<input id="d1" type="date" title="من تاريخ"><input id="d2" type="date" title="إلى تاريخ"></div>
+<div class="row"><button class="btn" id="fa">تطبيق الفلاتر</button><button class="btn ghost" id="fx">إعادة تعيين</button><button class="btn ghost" id="ex">تصدير Excel</button><span id="rc" style="color:var(--mute)"></span></div>
+<div class="tw"><table><thead><tr><th>#</th><th>الاسم</th><th>الرقم القومي</th><th>العمر</th><th>الجنس</th><th>السكن</th><th>المؤهل</th><th>الهاتف</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+<div class="pager"><button class="btn ghost" id="pv">السابق</button><span id="pi"></span><button class="btn ghost" id="nx">التالي</button></div></section>
+<section id="v-log" class="hide"><h1>سجل النشاطات</h1><div class="tw"><table><thead><tr><th>الوقت</th><th>العملية</th><th>الكيان</th><th>المعرّف</th><th>تفاصيل</th></tr></thead><tbody id="lt"></tbody></table></div></section>
+<section id="v-set" class="hide"><h1>إعدادات النظام</h1><form class="card set" id="sf">
+<div class="f"><label>اسم النظام</label><input id="s_name"></div><div class="f"><label>رابط اللوجو</label><input id="s_logo" dir="ltr"></div>
+<div class="f"><label>الحد الأقصى للمسجلين</label><input id="s_lim" type="number" min="0"></div>
+<div class="f chk"><input id="s_en" type="checkbox"><label for="s_en" style="margin:0">التسجيل مفتوح</label></div>
+<div class="f"><label>رابط مجموعة واتساب</label><input id="s_wa" dir="ltr"></div>
+<div class="f"><label>رسالة إغلاق التسجيل</label><textarea id="s_cl"></textarea></div><div class="f"><label>رسالة النجاح</label><textarea id="s_ok"></textarea></div>
+<button class="btn" id="ss">حفظ الإعدادات</button><div class="err" id="se"></div></form></section>
+</main></div>
+<dialog id="dlg"></dialog><div class="toast hide" id="toast"></div>
+
+<script>
+const SUPABASE_URL="https://kggwsmskuxykkbytpxik.supabase.co", SUPABASE_ANON_KEY="sb_publishable_S7HCePjZI6ofr6zQY5TY1g_4uXzMr45";  // نفس قيم index.html
+const CONFIGURED=!SUPABASE_URL.startsWith('YOUR_')&&!SUPABASE_ANON_KEY.startsWith('YOUR_');
+const sb=CONFIGURED?supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+const $=i=>document.getElementById(i), ST=['جديد','قيد المراجعة','مقبول','مرفوض','يحتاج إلى استكمال بيانات'];
+const COL={'جديد':'#C9A44C','قيد المراجعة':'#B7791F','مقبول':'#2E7D4F','مرفوض':'#B5121B','يحتاج إلى استكمال بيانات':'#7A6A4F'};
+const GOVS=['القاهرة','الجيزة','الإسكندرية','القليوبية','البحيرة','مطروح','كفر الشيخ','الغربية','المنوفية','الدقهلية','دمياط','الشرقية','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','الفيوم','بني سويف','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.remove('hide');setTimeout(()=>t.classList.add('hide'),2600)};
+const canEdit=()=>['super_admin','admin'].includes(me.role), isSuper=()=>me.role==='super_admin';
+const ROLE={super_admin:'مدير عام',admin:'مسؤول',viewer:'مشاهد'},UNAME={super_admin:'الإدارة العليا',admin:'إدارة التسجيل',viewer:'عرض البيانات'},UCLS={super_admin:'s',admin:'',viewer:'v'};
+let me=null,page=0,total=0;const PS=20;
+ST.forEach(s=>$('fs').append(new Option(s)));GOVS.forEach(g=>$('fr').append(new Option(g)));
+
+/* ---- دخول ---- */
+async function enter(){
+  const {data:{user}}=await sb.auth.getUser(); if(!user) return false;
+  const {data,error:ae}=await sb.from('admin_users').select('role').eq('auth_user_id',user.id).maybeSingle();
+  if(ae){await sb.auth.signOut();return 'dberror'}
+  if(!data){await sb.auth.signOut();return 'noaccess'}
+  me={role:data.role,email:user.email};$('un').textContent=UNAME[me.role];$('ur').textContent=ROLE[me.role];$('ur').className=UCLS[me.role];$('uc').title=user.email;
+  $('login').classList.add('hide');$('app').classList.remove('hide');go('ov');
+  sb.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'registrants'},()=>{if(!$('v-ov').classList.contains('hide'))loadOv();if(!$('v-reg').classList.contains('hide'))loadReg()}).subscribe();
+  return true;
+}
+$('lf').addEventListener('submit',async e=>{e.preventDefault();$('le').textContent='';
+  if(!CONFIGURED){$('le').textContent='لم يتم ربط Supabase: ضع SUPABASE_URL و SUPABASE_ANON_KEY في أعلى ملف admin.html.';return}
+  $('lb').disabled=true;
+  try{
+    const {error}=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
+    if(error){const m=error.message||'';
+      $('le').textContent=/not confirmed/i.test(m)?'الحساب غير مفعّل: أنشئه من Supabase مع تفعيل Auto Confirm.':/invalid login/i.test(m)?'البريد أو كلمة المرور غير صحيحة، أو لم يُنشأ هذا المستخدم في Authentication.':'تعذر الدخول: '+m;return}
+    const r=await enter();
+    if(r!==true)$('le').textContent=r==='noaccess'?'الحساب صحيح لكنه بلا صلاحية: تأكد أن بريده مطابق لأحد البريدين في admin_seed.':r==='dberror'?'تعذر قراءة الصلاحيات: تأكد من تشغيل ملف 001_core.sql كاملاً.':'تعذر تسجيل الدخول.';
+  }catch(err){$('le').textContent='خطأ في الاتصال: '+(err.message||err)}
+  finally{$('lb').disabled=false}});
+$('out').onclick=async()=>{await sb.auth.signOut();location.reload()};
+document.querySelectorAll('aside nav [data-v]').forEach(b=>b.onclick=()=>go(b.dataset.v));
+function go(v){document.querySelectorAll('main section').forEach(s=>s.classList.toggle('hide',s.id!=='v-'+v));
+  document.querySelectorAll('aside nav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  ({ov:loadOv,reg:()=>{page=0;loadReg()},log:loadLog,set:loadSet})[v]()}
+
+/* ---- الرئيسية ---- */
+const cnt=async f=>{let q=sb.from('registrants').select('id',{count:'exact',head:true});return (await f(q)).count||0};
+async function loadOv(){
+  const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()),wk=new Date(d0-6*864e5),mo=new Date(now.getFullYear(),now.getMonth(),1);
+  const [{data:st},tot,m,f,td,w,mn,rows]=await Promise.all([sb.from('public_counter').select('total').single().then(r=>r),
+    cnt(q=>q),cnt(q=>q.eq('gender','ذكر')),cnt(q=>q.eq('gender','أنثى')),cnt(q=>q.gte('created_at',d0.toISOString())),cnt(q=>q.gte('created_at',wk.toISOString())),cnt(q=>q.gte('created_at',mo.toISOString())),
+    sb.from('registrants').select('residence_governorate,education_level,application_status,created_at').order('created_at',{ascending:false}).limit(1000)]);
+  const {data:s}=await sb.from('system_settings').select('registration_limit').single();const lim=s?.registration_limit??0;
+  const S=[['إجمالي المسجلين',tot],['الأماكن المتاحة',Math.max(lim-tot,0)],['الحد الأقصى',lim],['الذكور',m],['الإناث',f],['تسجيلات اليوم',td],['آخر 7 أيام',w],['هذا الشهر',mn]];
+  $('stats').innerHTML=S.map(([l,v])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+  const R=rows.data||[],by=k=>{const o={};R.forEach(r=>o[r[k]]=(o[r[k]]||0)+1);return Object.entries(o).sort((a,b)=>b[1]-a[1])};
+  const bars=(t,a)=>{const mx=Math.max(1,...a.map(x=>x[1]));return `<div class="card"><h3 style="margin:0 0 8px">${t}</h3>${a.slice(0,10).map(([n,v])=>`<div class="bar"><span>${esc(n)}</span><i style="width:${v/mx*100}%"></i><b>${v}</b></div>`).join('')||'<span style="color:var(--mute)">لا توجد بيانات بعد</span>'}</div>`};
+  const dd=[];for(let i=13;i>=0;i--){const d=new Date(d0-i*864e5);dd.push([d.getDate(),R.filter(r=>new Date(r.created_at).toDateString()===d.toDateString()).length])}
+  const mx=Math.max(1,...dd.map(x=>x[1]));
+  $('charts').innerHTML=`<div class="card"><h3 style="margin:0 0 10px">التسجيلات اليومية (14 يوماً)</h3><div class="days">${dd.map(([d,v])=>`<div><i style="height:${v/mx*100}px"></i>${v||''}<br>${d}</div>`).join('')}</div></div>`+bars('حالات الطلب',by('application_status'))+bars('المحافظات',by('residence_governorate'))+bars('المؤهلات',by('education_level'));
+}
+
+/* ---- المسجلون ---- */
+function query(sel,opt){
+  let q=sb.from('registrants').select(sel,opt),v=x=>$(x).value.trim();
+  const s=v('q').replace(/[,()%*\\]/g,' ').trim();
+  if(s)q=q.or(['full_name','national_id','phone_normalized','whatsapp_normalized','email_normalized'].map(c=>`${c}.ilike.%${s}%`).join(','));
+  if(v('fs'))q=q.eq('application_status',v('fs'));if(v('fg'))q=q.eq('gender',v('fg'));if(v('fr'))q=q.eq('residence_governorate',v('fr'));if(v('fe'))q=q.eq('education_level',v('fe'));
+  const y=n=>{const d=new Date();d.setFullYear(d.getFullYear()-n);return d.toISOString().slice(0,10)};
+  if(v('a1'))q=q.lte('birth_date',y(+v('a1')));if(v('a2'))q=q.gt('birth_date',y(+v('a2')+1));
+  if(v('d1'))q=q.gte('created_at',v('d1'));if(v('d2'))q=q.lt('created_at',new Date(new Date(v('d2')).getTime()+864e5).toISOString());
+  return q;
+}
+const age=b=>{const d=new Date(b),n=new Date();let a=n.getFullYear()-d.getFullYear();if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--;return a};
+const mask=n=>n.slice(0,3)+'••••••••'+n.slice(-3);
+async function loadReg(){
+  $('tb').innerHTML='<tr><td colspan="11" style="color:var(--mute)">جارٍ التحميل...</td></tr>';
+  const {data,count,error}=await query('*',{count:'exact'}).order('created_at',{ascending:false}).range(page*PS,page*PS+PS-1);
+  if(error){$('tb').innerHTML='<tr><td colspan="11" class="err">تعذر تحميل البيانات.</td></tr>';return}
+  total=count||0;$('rc').textContent=total+' نتيجة';
+  $('tb').innerHTML=data.map(r=>`<tr><td>${r.registration_number}</td><td>${esc(r.full_name)}</td><td dir="ltr">${mask(r.national_id)}</td><td>${age(r.birth_date)}</td><td>${r.gender}</td><td>${esc(r.residence_governorate)}</td><td>${r.education_level}</td><td dir="ltr">0${r.phone_normalized}</td>
+  <td>${canEdit()?`<select data-id="${r.id}" style="border-color:${COL[r.application_status]};color:${COL[r.application_status]};font-weight:600">${ST.map(s=>`<option ${s===r.application_status?'selected':''}>${s}</option>`).join('')}</select>`:`<span class="pill" style="background:${COL[r.application_status]}">${r.application_status}</span>`}</td>
+  <td>${new Date(r.created_at).toLocaleDateString('ar-EG')}</td><td><button class="btn ghost" style="min-height:34px" data-d="${r.id}">تفاصيل</button></td></tr>`).join('')||'<tr><td colspan="11" style="color:var(--mute)">لا توجد نتائج مطابقة.</td></tr>';
+  $('pi').textContent=`صفحة ${page+1} من ${Math.max(1,Math.ceil(total/PS))}`;$('pv').disabled=page===0;$('nx').disabled=(page+1)*PS>=total;
+  $('tb').querySelectorAll('select').forEach(s=>s.onchange=async()=>{const {error}=await sb.from('registrants').update({application_status:s.value}).eq('id',s.dataset.id);toast(error?'تعذر تغيير الحالة':'تم تغيير الحالة');loadReg()});
+  $('tb').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>details(data.find(r=>r.id===b.dataset.d)));
+}
+function details(r){
+  const full=me.role!=='viewer';if(full)sb.rpc('log_activity',{p_action:'view_details',p_entity:'registrant',p_entity_id:String(r.registration_number)});
+  const L=[['رقم التسجيل',r.registration_number],['الاسم',r.full_name],['الرقم القومي',full?r.national_id:mask(r.national_id)],['تاريخ الميلاد',r.birth_date],['العمر',age(r.birth_date)],['الجنس',r.gender],['محافظة الرقم القومي',r.national_id_governorate],['محافظة السكن',r.residence_governorate],['المؤهل',r.education_level],['المدرسة',r.school_name],['الجامعة',r.university_name],['الكلية',r.faculty_name],['الدرجة العلمية',r.postgraduate_degree],['الهاتف','0'+r.phone_normalized],['الواتساب','0'+r.whatsapp_normalized],['البريد',r.email_normalized],['الحالة',r.application_status],['تاريخ التسجيل',new Date(r.created_at).toLocaleString('ar-EG')]].filter(x=>x[1]);
+  $('dlg').innerHTML=`<h3 style="margin-top:0">تفاصيل التسجيل</h3><dl>${L.map(([a,b])=>`<dt>${a}</dt><dd>${esc(b)}</dd>`).join('')}</dl><div class="row" style="margin:16px 0 0"><button class="btn ghost" id="cp">نسخ الهاتف والبريد</button>${isSuper()?'<button class="btn" id="dl">حذف</button>':''}<button class="btn ghost" id="cl">إغلاق</button></div>`;
+  $('dlg').showModal();$('cl').onclick=()=>$('dlg').close();
+  $('cp').onclick=()=>navigator.clipboard.writeText(`0${r.phone_normalized}\n${r.email_normalized}`).then(()=>toast('تم النسخ'));
+  if($('dl'))$('dl').onclick=async()=>{if(!confirm('حذف هذا التسجيل نهائياً؟'))return;const {error}=await sb.from('registrants').delete().eq('id',r.id);$('dlg').close();toast(error?'تعذر الحذف':'تم الحذف');loadReg()};
+}
+$('fa').onclick=()=>{page=0;loadReg()};$('q').onkeydown=e=>{if(e.key==='Enter'){page=0;loadReg()}};
+$('fx').onclick=()=>{document.querySelectorAll('.filters input,.filters select').forEach(i=>i.value='');page=0;loadReg()};
+$('pv').onclick=()=>{page--;loadReg()};$('nx').onclick=()=>{page++;loadReg()};
+$('ex').onclick=async()=>{
+  if(me.role==='viewer')return toast('التصدير غير متاح لدورك');
+  $('ex').disabled=true;let all=[];for(let i=0;i<20;i++){const {data,error}=await query('*').order('created_at',{ascending:false}).range(i*1000,i*1000+999);if(error)break;all=all.concat(data);if(data.length<1000)break}
+  const rows=all.map(r=>({'رقم التسجيل':r.registration_number,'الاسم':r.full_name,'الرقم القومي':r.national_id,'تاريخ الميلاد':r.birth_date,'العمر':age(r.birth_date),'الجنس':r.gender,'محافظة الرقم القومي':r.national_id_governorate,'محافظة السكن':r.residence_governorate,'المؤهل':r.education_level,'المدرسة':r.school_name,'الجامعة':r.university_name,'الكلية':r.faculty_name,'الدرجة العلمية':r.postgraduate_degree,'الهاتف':'0'+r.phone_normalized,'الواتساب':'0'+r.whatsapp_normalized,'البريد':r.email_normalized,'الحالة':r.application_status,'تاريخ التسجيل':r.created_at.slice(0,10)}));
+  const ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};XLSX.utils.book_append_sheet(wb,ws,'المسجلون');
+  XLSX.writeFile(wb,`registrants-${new Date().toISOString().slice(0,10)}.xlsx`);sb.rpc('log_activity',{p_action:'export_excel',p_details:{rows:rows.length}});$('ex').disabled=false;toast(`تم تصدير ${rows.length} سجل`);
+};
+
+/* ---- السجل ---- */
+async function loadLog(){const {data}=await sb.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(100);
+  $('lt').innerHTML=(data||[]).map(l=>`<tr><td>${new Date(l.created_at).toLocaleString('ar-EG')}</td><td>${esc(l.action)}</td><td>${esc(l.entity_type)}</td><td>${esc(l.entity_id)}</td><td dir="ltr">${esc(l.details&&Object.keys(l.details).length?JSON.stringify(l.details):'')}</td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--mute)">لا توجد نشاطات بعد.</td></tr>'}
+
+/* ---- الإعدادات ---- */
+async function loadSet(){const {data}=await sb.from('system_settings').select('*').single();if(!data)return;
+  $('s_name').value=data.system_name;$('s_logo').value=data.logo_url;$('s_lim').value=data.registration_limit;$('s_en').checked=data.registration_enabled;$('s_wa').value=data.whatsapp_group_link;$('s_cl').value=data.closed_message;$('s_ok').value=data.success_message;
+  document.querySelectorAll('#sf input,#sf textarea').forEach(i=>i.disabled=!isSuper());$('ss').classList.toggle('hide',!isSuper());$('se').textContent=isSuper()?'':'تعديل الإعدادات متاح للمدير العام فقط.'}
+$('sf').addEventListener('submit',async e=>{e.preventDefault();$('se').textContent='';const l=parseInt($('s_lim').value,10);if(!(l>=0)){$('se').textContent='أدخل حداً أقصى صحيحاً.';return}
+  const {error}=await sb.from('system_settings').update({system_name:$('s_name').value.trim(),logo_url:$('s_logo').value.trim(),registration_limit:l,registration_enabled:$('s_en').checked,whatsapp_group_link:$('s_wa').value.trim(),closed_message:$('s_cl').value.trim(),success_message:$('s_ok').value.trim()}).eq('id',1);
+  if(error)$('se').textContent='تعذر حفظ الإعدادات.';else{toast('تم حفظ الإعدادات');sb.rpc('log_activity',{p_action:'update_settings',p_entity:'settings'})}});
+
+if(SUPABASE_URL.startsWith('YOUR_')){$('le').textContent='أضف SUPABASE_URL و SUPABASE_ANON_KEY في أعلى الملف.'}else enter();
+</script></body></html>
