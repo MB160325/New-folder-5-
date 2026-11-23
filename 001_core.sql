@@ -38,7 +38,7 @@ insert into system_settings(id) values (1) on conflict do nothing;
 -- ---------- 3) المسجلون ----------
 create table if not exists registrants (
   id uuid primary key default gen_random_uuid(),
-  registration_number bigint generated always as identity unique,
+  registration_number bigint not null unique check (registration_number > 0),
   full_name text not null check (char_length(full_name) between 5 and 150),
   national_id text not null unique check (national_id ~ '^[23][0-9]{13}$'),
   birth_date date not null,
@@ -246,11 +246,14 @@ begin
   if gov is null then return jsonb_build_object('ok', false, 'error', 'invalid'); end if;
   gen := case when substr(nid,13,1)::int % 2 = 1 then 'ذكر' else 'أنثى' end;
 
-  insert into registrants(full_name, national_id, birth_date, gender, national_id_governorate, residence_governorate,
+  -- أصغر رقم تسجيل غير مستخدم (يعيد استخدام أرقام السجلات المحذوفة؛ آمن لأن صف الإعدادات مقفول)
+  select g into rn from generate_series(1, n + 1) g
+    where not exists (select 1 from registrants r where r.registration_number = g) order by g limit 1;
+
+  insert into registrants(registration_number, full_name, national_id, birth_date, gender, national_id_governorate, residence_governorate,
       education_level, school_name, university_name, faculty_name, postgraduate_degree,
       phone_normalized, whatsapp_normalized, email_normalized, privacy_consent)
-  values (v_name, nid, bd, gen, gov, res, edu, sch, uni, fac, pg, ph, wa, em, true)
-  returning registration_number into rn;
+  values (rn, v_name, nid, bd, gen, gov, res, edu, sch, uni, fac, pg, ph, wa, em, true);
 
   return jsonb_build_object('ok', true, 'registration_number', rn,
                             'whatsapp_link', s.whatsapp_group_link, 'message', s.success_message);

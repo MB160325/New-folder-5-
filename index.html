@@ -68,7 +68,18 @@ a.btn{display:block;text-decoration:none;line-height:56px;margin-top:14px}
 @media(max-width:860px){.layout{grid-template-columns:1fr;gap:20px;padding-top:20px}.brand{position:relative;top:0;padding:22px 18px}.gauge{width:140px;height:140px;margin-top:14px}.gauge b{font-size:36px}}
 @media(max-width:520px){.grid{grid-template-columns:1fr}fieldset{padding:20px 16px 6px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition:none!important}}
-footer{text-align:center;padding:0 0 28px;font-size:13px}footer a{color:var(--mute);text-decoration:none;border-bottom:1px solid var(--gold2)}footer a:hover{color:var(--red)}</style>
+footer{text-align:center;padding:0 0 28px;font-size:13px}footer a{color:var(--mute);text-decoration:none;border-bottom:1px solid var(--gold2)}footer a:hover{color:var(--red)}.fine{font-size:13.5px;color:var(--mute)!important}
+.layout.done{grid-template-columns:1fr;max-width:640px;gap:14px;padding-top:16px}
+.done .brand{position:relative;top:0;display:flex;align-items:center;gap:14px;text-align:right;padding:12px 18px}
+.done .brand .logo{width:52px;height:52px}.done .brand h1{font-size:18px;margin:0}
+.done .brand p,.done .gauge,.done .tally,.done .conn,.done .trust{display:none}
+.done .center{padding:22px 18px}.done .tick{width:66px;height:66px}.done .center h2{font-size:22px;margin:4px 0 10px}
+.cb{position:relative}.cb input{padding-inline-end:46px;cursor:pointer}
+.cbx{position:absolute;inset-block:0;inset-inline-end:0;width:46px;border:0;background:none;color:var(--gold);cursor:pointer;display:grid;place-items:center}
+.cbx svg{width:20px;height:20px;transition:transform .2s}.cb input[aria-expanded=true]+.cbx svg{transform:rotate(180deg)}
+.gl{position:absolute;z-index:30;top:calc(100% + 6px);inset-inline:0;max-height:250px;overflow-y:auto;margin:0;padding:6px;list-style:none;background:#fff;border:1px solid var(--gold);border-radius:12px;box-shadow:0 14px 28px -14px rgba(0,0,0,.3)}
+.gl li{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:15.5px}.gl li:hover,.gl li.on{background:#FFF6E0}.gl li.sel{color:var(--red2);font-weight:700}.gl li.none{color:var(--mute);cursor:default}
+</style>
 </head>
 <body>
 <div id="loader"><div class="ring"><img class="logoimg" alt=""></div><div id="loadmsg" style="font-family:Cairo;color:var(--mute)">يرجى الانتظار...</div></div>
@@ -99,7 +110,7 @@ footer{text-align:center;padding:0 0 28px;font-size:13px}footer a{color:var(--mu
 </fieldset>
 
 <fieldset><legend>السكن</legend>
-  <div class="f"><label for="residence">محافظة السكن</label><input id="residence" list="govs" placeholder="ابحث أو اختر"><datalist id="govs"></datalist><div class="err"></div></div>
+  <div class="f"><label for="residence">محافظة السكن</label><div class="cb" id="cb"><input id="residence" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="govlist" placeholder="اختر المحافظة أو اكتب للبحث"><button type="button" class="cbx" id="cbx" aria-label="عرض المحافظات" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><ul id="govlist" class="gl hide" role="listbox"></ul></div><div class="err"></div></div>
 </fieldset>
 
 <fieldset><legend>التعليم</legend>
@@ -127,9 +138,9 @@ footer{text-align:center;padding:0 0 28px;font-size:13px}footer a{color:var(--mu
   <h2>شكراً لك على التسجيل!</h2>
   <div class="num" id="regno"></div>
   <p id="smsg"></p>
-  <p>في حال قبول بياناتك، ستصلك دعوة رسمية عبر البريد الإلكتروني عند بدء مراجعة البيانات وإجراءات القبول.</p>
-  <p>نؤكد لك أن بياناتك سرية ولن تتم مشاركتها مع أي شخص أو جهة غير مصرح لها.</p>
   <div id="wabox" class="hide"><p>انضم الآن إلى مجموعة واتساب الرسمية لمتابعة آخر التحديثات والإعلانات.</p><a class="btn" id="walink" target="_blank" rel="noopener">انضم إلى مجموعة واتساب</a></div>
+  <p class="fine">في حال قبول بياناتك، ستصلك دعوة رسمية عبر البريد الإلكتروني عند بدء مراجعة البيانات وإجراءات القبول.</p>
+  <p class="fine">نؤكد لك أن بياناتك سرية ولن تتم مشاركتها مع أي شخص أو جهة غير مصرح لها.</p>
 </section>
 </div></main>
 <footer><a href="admin.html">دخول الإدارة</a></footer>
@@ -180,8 +191,28 @@ const rules={
   email:v=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.trim())?'':'بريد إلكتروني غير صالح'
 };
 const GOVS_ALL=['القاهرة','الجيزة','الإسكندرية','القليوبية','البحيرة','مطروح','كفر الشيخ','الغربية','المنوفية','الدقهلية','دمياط','الشرقية','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','الفيوم','بني سويف','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد'];
-GOVS_ALL.forEach(g=>{if(![...$('govs').options].some(o=>o.value===g))$('govs').append(new Option(g))});
 rules.residence=v=>GOVS_ALL.includes(v)?'':'اختر محافظة من القائمة';
+/* ===== قائمة المحافظات المنسدلة القابلة للبحث ===== */
+(function(){
+  const inp=$('residence'),ul=$('govlist'),btn=$('cbx');let idx=-1;
+  const isOpen=()=>!ul.classList.contains('hide');
+  const render=f=>{const t=(f||'').trim();const items=GOVS_ALL.filter(g=>!t||g.includes(t));
+    ul.innerHTML=items.map(g=>`<li role="option" data-v="${g}" class="${g===inp.value?'sel':''}">${g}</li>`).join('')||'<li class="none">لا توجد نتائج</li>';idx=-1};
+  const open=f=>{render(f);ul.classList.remove('hide');inp.setAttribute('aria-expanded','true')};
+  const close=()=>{ul.classList.add('hide');inp.setAttribute('aria-expanded','false')};
+  const pick=v=>{inp.value=v;close();inp.classList.remove('bad');inp.closest('.f').querySelector('.err').textContent=''};
+  inp.addEventListener('focus',()=>open(''));
+  inp.addEventListener('click',()=>{if(!isOpen())open('')});
+  inp.addEventListener('input',()=>open(inp.value));
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();if(isOpen())close();else{inp.focus();open('')}});
+  ul.addEventListener('pointerdown',e=>{const li=e.target.closest('li[data-v]');e.preventDefault();if(li)pick(li.dataset.v)});
+  inp.addEventListener('keydown',e=>{const lis=[...ul.querySelectorAll('li[data-v]')];
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!isOpen())open('');if(!lis.length)return;idx=(idx+(e.key==='ArrowDown'?1:-1)+lis.length)%lis.length;lis.forEach((l,i)=>l.classList.toggle('on',i===idx));lis[idx].scrollIntoView({block:'nearest'})}
+    else if(e.key==='Enter'&&isOpen()){e.preventDefault();if(idx>=0)pick(lis[idx].dataset.v);else if(lis.length===1)pick(lis[0].dataset.v)}
+    else if(e.key==='Escape')close()});
+  inp.addEventListener('blur',()=>setTimeout(()=>{const m=GOVS_ALL.filter(g=>g.includes(inp.value.trim()));if(inp.value.trim()&&!GOVS_ALL.includes(inp.value.trim())&&m.length===1)inp.value=m[0];close()},120));
+})();
+
 function validate(){
   let ok=true;
   for(const [id,fn] of Object.entries(rules)){
@@ -193,13 +224,13 @@ function validate(){
 }
 
 /* ===== Supabase + عداد لحظي ===== */
-let sb=null;
+let sb=null,done=false;
 function paint(s){
   const left=Math.max(s.limit-s.total,0);
   $('cnt').textContent=s.total; $('lim').textContent=s.limit; $('left').textContent=left;
   $('prog').style.strokeDashoffset=326.7*(1-(s.limit?Math.min(s.total/s.limit,1):1));
   $('sysname').textContent=s.system_name||'اتحاد طلاب تحيا مصر';
-  $('closed').classList.toggle('hide',s.open); $('form').classList.toggle('hide',!s.open);
+  if(!done){$('closed').classList.toggle('hide',s.open); $('form').classList.toggle('hide',!s.open);}
   $('closedmsg').textContent=s.closed_message;
   if(s.logo_url&&!LOGO_URL)document.querySelectorAll('.logoimg').forEach(i=>{i.src=s.logo_url;i.style.visibility='visible'});
 }
@@ -227,10 +258,10 @@ $('form').addEventListener('submit',async e=>{
   const fail=m=>{$('formerr').textContent=m;$('formerr').classList.remove('hide');scrollTo({top:0,behavior:'smooth'})};
   if(error||!data) return fail('تعذر الاتصال بالخادم. تحقق من الإنترنت وحاول مرة أخرى.');
   if(data.ok){
-    $('form').classList.add('hide');$('closed').classList.add('hide');$('success').classList.remove('hide');
+    done=true;$('form').classList.add('hide');$('closed').classList.add('hide');$('success').classList.remove('hide');
     $('regno').textContent='رقم التسجيل: '+data.registration_number; $('smsg').textContent=data.message||'';
     if(data.whatsapp_link){$('walink').href=data.whatsapp_link;$('wabox').classList.remove('hide')}
-    scrollTo({top:0});return;
+    done=true;$('app').classList.add('done');requestAnimationFrame(()=>{scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0});return;
   }
   if(data.error==='duplicate') return fail('هذه البيانات مسجلة بالفعل في النظام، يرجى مراجعة البيانات المدخلة أو التواصل مع إدارة التسجيل.');
   if(data.error==='closed'){sync();return fail(data.message)}
